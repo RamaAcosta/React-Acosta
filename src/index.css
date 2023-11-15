@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+::-webkit-scrollbar {
+  width: 8px;
+  transition: all 0.5s;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  transition: all 0.5s;
+}
+::-webkit-scrollbar-thumb {
+  background: #c9c9c9;
+  transition: all 0.5s;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(169, 169, 169);
+  transition: all 0.5s;
+}
