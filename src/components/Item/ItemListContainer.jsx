@@ -3,57 +3,54 @@ import { NavLink, useParams } from 'react-router-dom'
 import Barloader from 'react-spinners/BarLoader'
 
 import ItemCard from './ItemCard'
+import { collection, getDocs, getFirestore } from 'firebase/firestore'
+import ItemList from './ItemList'
 
 const ItemListContainer = () => {
-  const [data, setData] = useState([])
+  const [items, setItems] = useState([])
+  const { category } = useParams()
+  const [filteredItems, setFilteredItems] = useState([])
   const [loading, setLoading] = useState(true)
 
-  const params = useParams()
-  console.log(params.category)
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const db = getFirestore()
+        const itemCollection = collection(db, 'items')
+        const snapshot = await getDocs(itemCollection)
+        const allData = snapshot.docs.map(document => ({ id: document.id, ...document.data() }))
+        setItems(allData)
+        setLoading(false)
+      } catch {
+        console.log('error')
+      }
+    }
+    fetchData()
+  }, [])
 
   useEffect(() => {
-    fetchData()
-  }, [params.category])
-
-  const fetchData = async () => {
     try {
-      setLoading(true)
-      if (params.category === undefined) {
-        const response = await fetch(`https://fakestoreapi.com/products`)
-        const result = await response.json()
-        console.log(result)
-        setData(result)
+      if (category) {
+        const filtered = items.filter(item => item.category === category)
+        setFilteredItems(filtered)
       } else {
-        const response = await fetch(
-          `https://fakestoreapi.com/products/category/${params.category}`
-        )
-        const result = await response.json()
-        await console.log(result)
-        setData(result)
+        setFilteredItems(items)
       }
-    } catch (error) {
+    } catch {
       console.log(error)
-    } finally {
-      setLoading(false)
     }
-  }
+  }, [items, category])
 
   return (
-    <section className='grid grid-cols-4 w-3/4 m-auto items-center gap-4 pt-12 min-h-screen'>
+    <div className=' flex justify-center items-center min-h-screen'>
       {loading ? (
-        <Barloader className='absolute m-[400px]' />
-      ) : data.length === 0 ? (
-        <p>No items found.</p>
+        <Barloader />
       ) : (
-        data.map((item) => (
-          <li key={item.id} className='list-none'>
-            <NavLink to={`/item/${item.id}`}>
-              <ItemCard item={item} />
-            </NavLink>
-          </li>
-        ))
+        <section className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6 px-12 items-center gap-4 pt-12 min-h-screen'>
+          <ItemList items={filteredItems} />
+        </section>
       )}
-    </section>
+    </div>
   )
 }
 
